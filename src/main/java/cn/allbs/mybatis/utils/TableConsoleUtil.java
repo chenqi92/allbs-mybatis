@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TableConsoleUtil {
 
-    public static String printResult(List<String> rows) {
+    public static String printResult(List<String> rows, Long chineRate) {
         StringBuilder sb = new StringBuilder();
         String[] tempA = rows.get(0).split(",");
         int maxLen = tempA.length;
@@ -32,7 +32,7 @@ public class TableConsoleUtil {
         int[] maxJ = new int[maxLen];
         for (int j = 0; j < maxLen; j++) {
             for (int i = 0; i < rows.size(); i++) {
-                int vLen = (getWordCount(row[i][j]) - 1 >> 3) * 8 + 8;
+                int vLen = (getWordCount(row[i][j], chineRate) - 1 >> 3) * 8 + 8;
                 if (vLen > maxJ[j]) {
                     maxJ[j] = vLen;
                 }
@@ -54,7 +54,7 @@ public class TableConsoleUtil {
             }
             sb.append("|");
             for (int j = 0; j < row[0].length; j++) {
-                int len = maxJ[j] - getWordCount(strings[j]);
+                int len = maxJ[j] - getWordCount(strings[j], chineRate);
                 String format;
                 if (len == 0) {
                     format = "%s";
@@ -77,7 +77,7 @@ public class TableConsoleUtil {
         return sb.toString();
     }
 
-    public static int getWordCount(String s) {
+    public static int getWordCount(String s, Long chineRate) {
         int length = 0;
         int chineseNum = 0;
         for (int i = 0; i < s.length(); i++) {
@@ -86,6 +86,6 @@ public class TableConsoleUtil {
             else chineseNum++;
 
         }
-        return BigDecimal.valueOf(length + chineseNum * 1.5).setScale(0, RoundingMode.HALF_UP).intValue();
+        return BigDecimal.valueOf(length + chineseNum * chineRate).setScale(0, RoundingMode.HALF_UP).intValue();
     }
 }

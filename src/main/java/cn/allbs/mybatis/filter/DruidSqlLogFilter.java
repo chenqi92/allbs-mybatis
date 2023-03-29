@@ -208,7 +208,7 @@ public class DruidSqlLogFilter extends FilterEventAdapter {
             String sqlLogger = querySql + "{}" + "--------------------------------[ Results Total {} ]---------------------------------\n";
             String results = "";
             if (rowList.size() > 0) {
-                results = TableConsoleUtil.printResult(rowList);
+                results = TableConsoleUtil.printResult(rowList, mybatisProperties.getChineRate());
             }
             log.info(sqlLogger, results, rows);
             rows = 0;
