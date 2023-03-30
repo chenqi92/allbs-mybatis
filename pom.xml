@@ -10,6 +10,7 @@
     <packaging>jar</packaging>
     <description>mybatis plus配置，实现自定义sql格式打印，处理sql注入问题等</description>
     <version>2.0.2</version>
+    <url>www.allbs.cn</url>
 
     <properties>
         <java.version>1.8</java.version>
@@ -73,10 +74,10 @@
         </license>
     </licenses>
     <scm>
-        <tag>V${project.parent.version}</tag>
-        <url>git@github.com:chenqi92/allbs.git</url>
-        <connection>scm:git:git@github.com:chenqi92/allbs.git</connection>
-        <developerConnection>scm:git:git@github.com:chenqi92/allbs.git</developerConnection>
+        <tag>V${version}</tag>
+        <url>git@github.com:chenqi92/allbs-mybatis.git</url>
+        <connection>scm:git:git@github.com:chenqi92/allbs-mybatis.git</connection>
+        <developerConnection>scm:git:git@github.com:chenqi92/allbs-mybatis.git</developerConnection>
     </scm>
     <developers>
         <developer>
