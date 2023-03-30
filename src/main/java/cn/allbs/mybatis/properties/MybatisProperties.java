@@ -24,7 +24,12 @@ public class MybatisProperties {
     /**
      * 自定义汉字比英文字母的比例，用于sql打印时的展示效果，这边取个巧
      */
-    private long chineRate = 2;
+    private double chineRate = 2;
+
+    /**
+     * 数据权限是否开启
+     */
+    private boolean dataPms = false;
 
     /**
      * 自定义审计字段

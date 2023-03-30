@@ -13,7 +13,7 @@ import java.util.List;
  */
 public class TableConsoleUtil {
 
-    public static String printResult(List<String> rows, Long chineRate) {
+    public static String printResult(List<String> rows, Double chineRate) {
         StringBuilder sb = new StringBuilder();
         String[] tempA = rows.get(0).split(",");
         int maxLen = tempA.length;
@@ -77,7 +77,7 @@ public class TableConsoleUtil {
         return sb.toString();
     }
 
-    public static int getWordCount(String s, Long chineRate) {
+    public static int getWordCount(String s, Double chineRate) {
         int length = 0;
         int chineseNum = 0;
         for (int i = 0; i < s.length(); i++) {

@@ -1,5 +1,8 @@
 package cn.allbs.mybatis;
 
+import cn.allbs.mybatis.datascope.DataPmsHandler;
+import cn.allbs.mybatis.datascope.DataPmsInterceptor;
+import cn.allbs.mybatis.datascope.DefaultPmsHandler;
 import cn.allbs.mybatis.filter.DruidSqlLogFilter;
 import cn.allbs.mybatis.properties.MybatisProperties;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
@@ -7,6 +10,8 @@ import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -34,11 +39,23 @@ public class MybatisPlusConfig implements WebMvcConfigurer {
      * mybatis plus 配置分页
      */
     @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor() {
+    public MybatisPlusInterceptor mybatisPlusInterceptor(MybatisProperties properties, DataPmsHandler dataPmsHandler) {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
+        if (properties.isDataPms()) {
+            // 数据权限
+            DataPmsInterceptor dataPermissionInterceptor = new DataPmsInterceptor(dataPmsHandler);
+            interceptor.addInnerInterceptor(dataPermissionInterceptor);
+        }
         // 分页支持
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
         return interceptor;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(DataPmsHandler.class)
+    @ConditionalOnProperty(prefix = "mybatis-plus", name = "data-pms", havingValue = "true")
+    public DataPmsHandler dataPmsHandler() {
+        return new DefaultPmsHandler();
     }
 
     /**

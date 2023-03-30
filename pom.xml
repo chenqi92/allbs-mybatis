@@ -2,34 +2,30 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <parent>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-parent</artifactId>
-        <version>2.7.9</version>
-        <relativePath/> <!-- lookup parent from repository -->
-    </parent>
     <modelVersion>4.0.0</modelVersion>
 
+    <groupId>cn.allbs</groupId>
     <artifactId>allbs-mybatis</artifactId>
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>mybatis plus配置，实现自定义sql格式打印，处理sql注入问题等</description>
-    <version>2.0.1</version>
+    <version>2.0.2</version>
 
     <properties>
         <java.version>1.8</java.version>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <project.build.sourceEncoding>utf-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>utf-8</project.reporting.outputEncoding>
         <mybatis-plus.version>3.5.3.1</mybatis-plus.version>
         <druid.version>1.2.16</druid.version>
         <allbs.version>2.0.0</allbs.version>
         <spring.checkstyle.plugin>0.0.29</spring.checkstyle.plugin>
-        <spring-webmvc.version>6.0.7</spring-webmvc.version>
+        <spring-webmvc.version>5.3.26</spring-webmvc.version>
+        <spring-boot.version>2.7.9</spring-boot.version>
     </properties>
 
     <dependencies>
-        <!--mybatis plus extension,包含了mybatis plus core-->
-        <!-- mybatis-plus start -->
         <dependency>
             <groupId>com.baomidou</groupId>
             <artifactId>mybatis-plus-extension</artifactId>
@@ -65,6 +61,7 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring-boot.version}</version>
         </dependency>
     </dependencies>
 
