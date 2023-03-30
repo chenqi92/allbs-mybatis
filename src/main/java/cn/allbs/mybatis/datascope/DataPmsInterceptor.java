@@ -46,6 +46,10 @@ public class DataPmsInterceptor extends JsqlParserSupport implements InnerInterc
             if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
                 return;
             }
+            // 处理包含分页的情况
+            if (ms.getId().contains("_mpCount") && InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId().replace("_mpCount", ""))) {
+                return;
+            }
             PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
             mpBs.sql(parserMulti(mpBs.sql(), ms.getId()));
         }
