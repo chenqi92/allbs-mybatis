@@ -10,11 +10,11 @@ import java.lang.annotation.*;
  */
 @Documented
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.FIELD, ElementType.ANNOTATION_TYPE})
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface ScopeField {
 
     /**
-     * 字段名（该值可无）
+     * 当前表中需要过滤的字段名（该值可无）
      */
     String value() default "";
 }
