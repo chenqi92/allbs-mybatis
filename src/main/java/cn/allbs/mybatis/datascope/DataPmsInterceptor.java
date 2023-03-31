@@ -1,12 +1,16 @@
 package cn.allbs.mybatis.datascope;
 
+import cn.allbs.mybatis.execption.UserOverreachException;
 import cn.allbs.mybatis.utils.PluginUtils;
 import com.baomidou.mybatisplus.core.plugins.InterceptorIgnoreHelper;
 import com.baomidou.mybatisplus.extension.parser.JsqlParserSupport;
 import com.baomidou.mybatisplus.extension.plugins.inner.InnerInterceptor;
 import lombok.*;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Expression;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.delete.Delete;
 import net.sf.jsqlparser.statement.insert.Insert;
 import net.sf.jsqlparser.statement.select.PlainSelect;
@@ -14,11 +18,18 @@ import net.sf.jsqlparser.statement.select.Select;
 import net.sf.jsqlparser.statement.select.SelectBody;
 import net.sf.jsqlparser.statement.select.SetOperationList;
 import net.sf.jsqlparser.statement.update.Update;
+import org.apache.ibatis.executor.Executor;
 import org.apache.ibatis.executor.statement.StatementHandler;
+import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 import org.apache.ibatis.mapping.SqlCommandType;
+import org.apache.ibatis.session.ResultHandler;
+import org.apache.ibatis.session.RowBounds;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -35,23 +46,48 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = true)
 @SuppressWarnings({"rawtypes"})
 public class DataPmsInterceptor extends JsqlParserSupport implements InnerInterceptor {
+
+    protected final Logger logger = LoggerFactory.getLogger(this.getClass());
     private DataPmsHandler dataPermissionHandler;
+
+    @Override
+    public void beforeQuery(Executor executor, MappedStatement ms, Object parameter, RowBounds rowBounds, ResultHandler resultHandler, BoundSql boundSql) throws SQLException {
+        if (InterceptorIgnoreHelper.willIgnoreTenantLine(ms.getId())) {
+            return;
+        }
+        // 处理包含分页的情况
+        if (ms.getId().contains("_mpCount") && InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId().replace("_mpCount", ""))) {
+            return;
+        }
+        PluginUtils.MPBoundSql mpBs = PluginUtils.mpBoundSql(boundSql);
+        mpBs.sql(parserSingle(mpBs.sql(), null));
+    }
 
     @Override
     public void beforePrepare(StatementHandler sh, Connection connection, Integer transactionTimeout) {
         PluginUtils.MPStatementHandler mpSh = PluginUtils.mpStatementHandler(sh);
         MappedStatement ms = mpSh.mappedStatement();
         SqlCommandType sct = ms.getSqlCommandType();
-        if (sct == SqlCommandType.UPDATE || sct == SqlCommandType.DELETE || sct == SqlCommandType.SELECT) {
+        if (sct == SqlCommandType.UPDATE || sct == SqlCommandType.DELETE || sct == SqlCommandType.INSERT) {
             if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
-                return;
-            }
-            // 处理包含分页的情况
-            if (ms.getId().contains("_mpCount") && InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId().replace("_mpCount", ""))) {
                 return;
             }
             PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
             mpBs.sql(parserMulti(mpBs.sql(), ms.getId()));
+            try {
+                // 当为更新或者插入时处理插入
+                Statement statement = CCJSqlParserUtil.parse(mpSh.mPBoundSql().sql());
+                if (sct == SqlCommandType.UPDATE) {
+                    dataPermissionHandler.updateParameter((Update) statement, ms, mpSh.boundSql(), connection);
+                }
+                if (sct == SqlCommandType.INSERT) {
+                    dataPermissionHandler.insertParameter((Insert) statement, mpSh.boundSql());
+                }
+            } catch (UserOverreachException e) {
+                throw new UserOverreachException();
+            } catch (JSQLParserException e) {
+                logger.error("Unexpected error for mappedStatement={}, sql={}", ms.getId(), mpBs.sql(), e);
+            }
         }
     }
 
@@ -75,7 +111,6 @@ public class DataPmsInterceptor extends JsqlParserSupport implements InnerInterc
      */
     @Override
     protected void processInsert(Insert insert, int index, String sql, Object obj) {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -117,26 +152,4 @@ public class DataPmsInterceptor extends JsqlParserSupport implements InnerInterc
     protected Expression getUpdateOrDeleteExpression(final Table table, final Expression where, final String whereSegment) {
         return dataPermissionHandler.getSqlSegment(table, where, whereSegment);
     }
-
-//    protected Expression andExpression(Table table, Expression where, final String whereSegment) {
-//        //获得where条件表达式
-//        final Expression expression = buildTableExpression(table, where, whereSegment);
-//        if (expression == null) {
-//            return where;
-//        }
-//        if (where != null) {
-//            if (where instanceof OrExpression) {
-//                return new AndExpression(new Parenthesis(where), expression);
-//            } else {
-//                return new AndExpression(where, expression);
-//            }
-//        }
-//        return expression;
-//    }
-//
-//    public Expression buildTableExpression(final Table table, final Expression where, final String whereSegment) {
-//        // 只有新版数据权限处理器才会执行到这里
-//        final MultiDataPermissionHandler handler = (MultiDataPermissionHandler) dataPermissionHandler;
-//        return handler.getSqlSegment(table, where, whereSegment);
-//    }
 }
