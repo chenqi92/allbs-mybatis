@@ -9,7 +9,7 @@
     <name>${project.artifactId}</name>
     <packaging>jar</packaging>
     <description>mybatis plus配置，实现自定义sql格式打印，处理sql注入问题等</description>
-    <version>2.0.2</version>
+    <version>2.0.3</version>
     <url>www.allbs.cn</url>
 
     <properties>
@@ -74,7 +74,7 @@
         </license>
     </licenses>
     <scm>
-        <tag>V${version}</tag>
+        <tag>V{project.version}</tag>
         <url>git@github.com:chenqi92/allbs-mybatis.git</url>
         <connection>scm:git:git@github.com:chenqi92/allbs-mybatis.git</connection>
         <developerConnection>scm:git:git@github.com:chenqi92/allbs-mybatis.git</developerConnection>

@@ -72,22 +72,47 @@ public class DataPmsInterceptor extends JsqlParserSupport implements InnerInterc
             if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
                 return;
             }
-            PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
-            mpBs.sql(parserMulti(mpBs.sql(), ms.getId()));
-            try {
-                // 当为更新或者插入时处理插入
-                Statement statement = CCJSqlParserUtil.parse(mpSh.mPBoundSql().sql());
-                if (sct == SqlCommandType.UPDATE) {
-                    dataPermissionHandler.updateParameter((Update) statement, ms, mpSh.boundSql(), connection);
-                }
-                if (sct == SqlCommandType.INSERT) {
-                    dataPermissionHandler.insertParameter((Insert) statement, mpSh.boundSql());
-                }
-            } catch (UserOverreachException e) {
-                throw new UserOverreachException();
-            } catch (JSQLParserException e) {
-                logger.error("Unexpected error for mappedStatement={}, sql={}", ms.getId(), mpBs.sql(), e);
+            handleInsertOrUpdateDataPms(mpSh, ms, sct);
+        }
+    }
+
+    @Override
+    public void beforeGetBoundSql(StatementHandler sh) {
+        // do nothing
+        PluginUtils.MPStatementHandler mpSh = PluginUtils.mpStatementHandler(sh);
+        MappedStatement ms = mpSh.mappedStatement();
+        SqlCommandType sct = ms.getSqlCommandType();
+        if (sct == SqlCommandType.UPDATE || sct == SqlCommandType.INSERT) {
+            if (InterceptorIgnoreHelper.willIgnoreDataPermission(ms.getId())) {
+                return;
             }
+            handleInsertOrUpdateDataPms(mpSh, ms, sct);
+        }
+    }
+
+    /**
+     * 新增或修改时判断是否存在超出用户权限的数据
+     *
+     * @param mpSh PluginUtils.MPStatementHandler
+     * @param ms   MappedStatement
+     * @param sct  SqlCommandType
+     */
+    private void handleInsertOrUpdateDataPms(PluginUtils.MPStatementHandler mpSh, MappedStatement ms, SqlCommandType sct) {
+        PluginUtils.MPBoundSql mpBs = mpSh.mPBoundSql();
+        mpBs.sql(parserMulti(mpBs.sql(), ms.getId()));
+        try {
+            // 当为更新或者插入时处理插入
+            Statement statement = CCJSqlParserUtil.parse(mpSh.mPBoundSql().sql());
+            if (sct == SqlCommandType.UPDATE) {
+                dataPermissionHandler.updateParameter((Update) statement, ms, mpSh.boundSql());
+            }
+            if (sct == SqlCommandType.INSERT) {
+                dataPermissionHandler.insertParameter((Insert) statement, mpSh.boundSql());
+            }
+        } catch (UserOverreachException e) {
+            throw new UserOverreachException();
+        } catch (JSQLParserException e) {
+            logger.error("Unexpected error for mappedStatement={}, sql={}", ms.getId(), mpBs.sql(), e);
         }
     }
 

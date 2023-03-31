@@ -7,8 +7,6 @@ import net.sf.jsqlparser.statement.update.Update;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 
-import java.sql.Connection;
-
 /**
  * 类 DefaultPmsHandler
  *
@@ -27,7 +25,7 @@ public class DefaultPmsHandler implements DataPmsHandler {
     }
 
     @Override
-    public void updateParameter(Update updateStmt, MappedStatement mappedStatement, BoundSql boundSql, Connection connection) {
+    public void updateParameter(Update updateStmt, MappedStatement mappedStatement, BoundSql boundSql) {
 
     }
 }

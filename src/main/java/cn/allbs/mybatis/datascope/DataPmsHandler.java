@@ -7,8 +7,6 @@ import net.sf.jsqlparser.statement.update.Update;
 import org.apache.ibatis.mapping.BoundSql;
 import org.apache.ibatis.mapping.MappedStatement;
 
-import java.sql.Connection;
-
 /**
  * 接口 AllbsDataPermissionHandler
  *
@@ -41,8 +39,7 @@ public interface DataPmsHandler {
      * @param updateStmt      Update
      * @param mappedStatement MappedStatement
      * @param boundSql        BoundSql
-     * @param connection      Connection
      */
-    void updateParameter(Update updateStmt, MappedStatement mappedStatement, BoundSql boundSql, Connection connection);
+    void updateParameter(Update updateStmt, MappedStatement mappedStatement, BoundSql boundSql);
 }
 
